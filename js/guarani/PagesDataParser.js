@@ -113,7 +113,7 @@ let PagesDataParser = function (utils, apiConnector) {
 			const yearAndQuarterRegex = /^((1|2)(?:er|do) Cuat|Anual) (\d{4})$/;
 			// After all the class schedules rows, this is the following text so we know where to stop..
 			while (contents[i] !== "Firma y Sello Departamento") {
-				let courseCode = contents[i++];	// e.g.: 950701
+				let courseCode = contents[i++]; // e.g.: 950701
 				if (!/^\d{6}$/.test(courseCode)) throw `courseCode couldn't be parsed: ${courseCode}. PdfContents: ${JSON.stringify(contents)}`;
 
 				let courseName = contents[i++]; // e.g.: Fisica I
@@ -134,8 +134,12 @@ let PagesDataParser = function (utils, apiConnector) {
 
 				let branch = contents[i++].toUpperCase()
 					.replace(" ", "_")
-					.replace("CAMPUS_VIRTUAL", "AULA_VIRTUAL")
-					.replace("ESCUELA", "PIÑERO");	// e.g.: CAMPUS, MEDRANO, AULA_VIRTUAL, PIÑERO
+					.replace("CAMPUS_VIRTUAL", "AULA_VIRTUAL"); // e.g.: CAMPUS, MEDRANO, AULA_VIRTUAL, ESCUELA
+				if (branch === "ESCUELA") {
+					// For some reason, this comes as two separate elements, like: ["Escuela", "Técnica -"]
+					validateExpectedContents(["Técnica -"]);
+					branch = "PIÑERO";
+				}
 				if (branch === "SIN_DESIGNAR") branch = null;
 
 				i++; // (ClassRoomnumber) e.g.: "Sin definir", "2"
